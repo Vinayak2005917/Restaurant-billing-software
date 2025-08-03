@@ -39,17 +39,13 @@ with st.sidebar:
     st.write("**Name:** Vinayak Mishra")
     st.write("**Role:** Cashier")
     st.markdown("---")
-    st.markdown("### Navigation")
 
-    if st.button("New Order"):
-        st.session_state.page = "new_order"
-        st.session_state.show_msg = True
-    if st.button("Order History"):
-        st.session_state.page = "history"
     if st.button("Reports"):
         st.session_state.page = "reports"
     if st.button("Log Out"):
         st.session_state.page = "logout"
+    if st.button("Settings"):
+        st.session_state.page = "settings"
 
 # Main UI: Dine In and Take Away buttons only here
 st.title("🍽️ Add a New order!!")
@@ -65,18 +61,10 @@ with col2:
 # Simple page render on sidebar nav buttons
 page = st.session_state.get("page", "home")
 
-if page == "new_order":
-    if st.session_state.get("show_msg", False):
-        msg_box = st.empty()
-        msg_box.success("Already on main page")
-        time.sleep(2)
-        msg_box.empty()
-        st.session_state.show_msg = False  # Prevent showing again
-elif page == "history":
-    st.subheader("📜 Order History")
-    # Your History UI here
-elif page == "reports":
-    st.subheader("📊 Reports")
+
+
+if page == "reports":
+    st.switch_page("pages/reports.py")
     # Your Reports UI here
 elif page == "settings":
     st.subheader("⚙️ Settings")

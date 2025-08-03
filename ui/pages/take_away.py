@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 
+st.set_page_config(page_title="Restaurant Billing Software", layout="wide")
 st.markdown("<h1 style='text-align: center;'>Take Away</h1>", unsafe_allow_html=True)
 
 # Hide the hamburger menu and default sidebar page list only
