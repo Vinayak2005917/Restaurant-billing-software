@@ -4,7 +4,6 @@ import os
 
 
 st.set_page_config(page_title="Restaurant Billing Software", layout="wide")
-st.set_page_config(page_title="Sales Reports", layout="wide")
 st.markdown("<h1 style='text-align: center;'>📊 Sales Reports</h1>", unsafe_allow_html=True)
 
 # Hide the hamburger menu and default sidebar page list

@@ -53,9 +53,17 @@ with st.sidebar:
             st.write(f"**Total Items:** {total_items}")
             st.write(f"**Total Price:** ₹{total_price:.2f}")
             
-            # Dummy checkout button
+            # Checkout button with functionality
             if st.button("🛒 Checkout", type="primary", use_container_width=True):
-                pass  # Does nothing for now
+                # Save order type and cart to session state before switching
+                st.session_state.table_number = "Take-away"  # Use "Take-away" as identifier
+                st.session_state.total_items = total_items
+                st.session_state.total_price = total_price
+                # Only allow checkout if cart has items
+                if total_items > 0:
+                    st.switch_page("pages/payments.py")
+                else:
+                    st.warning("Please add items to the cart before checkout.")
         else:
             st.write("Cart is empty")
     else:

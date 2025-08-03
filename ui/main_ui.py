@@ -33,7 +33,7 @@ remove_sidebar_padding = """
 st.markdown(remove_sidebar_padding, unsafe_allow_html=True)
 st.markdown(hide_default_page_menu, unsafe_allow_html=True)
 
-# Sidebar content (only cashier info and custom nav)
+# Sidebar content
 with st.sidebar:
     st.markdown("### 👨‍💼 Staff Info")
     st.write("**Name:** Vinayak Mishra")

@@ -60,86 +60,15 @@ with st.sidebar:
             
             # Checkout button with functionality
             if st.button("🛒 Checkout", type="primary", use_container_width=True):
-                # Generate random order number
-                order_number = f"ORD{random.randint(10000, 99999)}"
-                
-                # Get current timestamp
-                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
-                # Prepare order data
-                order_data = {
-                    'order_number': order_number,
-                    'order_type': 'Dine-in',
-                    'table_number': table_number,
-                    'total_amount': total_price,
-                    'total_items': total_items,
-                    'timestamp': timestamp,
-                    'items_detail': []
-                }
-                
-                # Add item details
-                for item_key, item_data in st.session_state.cart.items():
-                    if item_data['quantity'] > 0:
-                        item_detail = f"{item_data['name']} x {item_data['quantity']} = ₹{item_data['quantity'] * item_data['price']:.2f}"
-                        order_data['items_detail'].append(item_detail)
-                
-                # Convert items list to string for CSV storage
-                items_string = " | ".join(order_data['items_detail'])
-                
-                # Prepare data for CSV
-                csv_data = {
-                    'Order_Number': [order_number],
-                    'Order_Type': ['Dine-in'],
-                    'Table_Number': [table_number],
-                    'Total_Amount': [total_price],
-                    'Total_Items': [total_items],
-                    'Items_Detail': [items_string],
-                    'Timestamp': [timestamp]
-                }
-                
-                # Create DataFrame
-                new_order_df = pd.DataFrame(csv_data)
-                
-                # Save to CSV
-                try:
-                    # Get path to data folder
-                    current_dir = os.path.dirname(os.path.abspath(__file__))
-                    project_root = os.path.dirname(os.path.dirname(current_dir))
-                    sales_report_path = os.path.join(project_root, "data", "sales_report.csv")
-                    
-                    # Check if file exists and has content
-                    if os.path.exists(sales_report_path) and os.path.getsize(sales_report_path) > 0:
-                        try:
-                            # Try to read existing file
-                            existing_df = pd.read_csv(sales_report_path)
-                            updated_df = pd.concat([existing_df, new_order_df], ignore_index=True)
-                            updated_df.to_csv(sales_report_path, index=False)
-                        except pd.errors.EmptyDataError:
-                            # File exists but is empty, create with headers
-                            new_order_df.to_csv(sales_report_path, index=False)
-                    else:
-                        # File doesn't exist or is empty, create new file with headers
-                        new_order_df.to_csv(sales_report_path, index=False)
-                    
-                    # Show success message with order details
-                    st.success(f"✅ Order {order_number} placed successfully!")
-                    st.info(f"📋 **Order Summary:**\n\n"
-                           f"🏷️ Order Number: {order_number}\n\n"
-                           f"🍽️ Table: {table_number}\n\n"
-                           f"💰 Total: ₹{total_price:.2f}\n\n"
-                           f"📦 Items: {total_items}\n\n"
-                           f"🕒 Time: {timestamp}")
-                    
-                    # Clear the cart after successful order
-                    st.session_state.cart = {}
-                    st.rerun()
-                    
-                except Exception as e:
-                    st.error(f"❌ Error saving order: {str(e)}")
-        else:
-            st.write("Cart is empty")
-    else:
-        st.write("Cart is empty")
+                # Save table number and cart to session state before switching
+                st.session_state.table_number = table_number
+                st.session_state.total_items = total_items
+                st.session_state.total_price = total_price
+                # Only allow checkout if cart has items and table number is entered
+                if total_items > 0 and table_number:
+                    st.switch_page("pages/payments.py")
+                else:
+                    st.warning("Please enter a table number and add items to the cart before checkout.")
 
 
 # Only show Clear Cart button if there are items in the cart

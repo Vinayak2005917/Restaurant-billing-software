@@ -127,12 +127,6 @@ Edit `data/menu.csv` to customize your menu:
 - `short_description`: Item description
 - `price`: Item price (optional, defaults to ₹100)
 
-### Staff Information
-Update staff details in the sidebar sections of each page:
-```python
-st.write("**Name:** Your Name")
-st.write("**Role:** Your Role")
-```
 
 ## 📸 Screenshots
 
@@ -167,24 +161,6 @@ st.write("**Role:** Your Role")
 - **Error Handling**: Graceful error management
 - **Data Validation**: Input sanitization and validation
 
-## 📈 Future Enhancements
-
-### Planned Features
-- [ ] **Payment Integration**: Multiple payment methods
-- [ ] **Inventory Management**: Stock level tracking
-- [ ] **Staff Management**: Multi-user authentication
-- [ ] **Kitchen Display**: Order management for kitchen staff
-- [ ] **Customer Management**: Customer database and loyalty programs
-- [ ] **Advanced Reports**: Daily/monthly sales reports
-- [ ] **Table Management**: Table status and reservations
-- [ ] **Print Receipts**: Physical receipt printing
-
-### Database Migration
-- [ ] **SQLite Integration**: Replace CSV with database
-- [ ] **Data Relationships**: Proper foreign key relationships
-- [ ] **Performance Optimization**: Faster data operations
-- [ ] **Backup System**: Automated data backups
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -202,25 +178,3 @@ st.write("**Role:** Your Role")
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Vinayak Mishra**
-- GitHub: [@Vinayak2005917](https://github.com/Vinayak2005917)
-
-## 🙏 Acknowledgments
-
-- Streamlit community for the excellent framework
-- Contributors and testers
-- Restaurant industry professionals for feature insights
-
-## 📞 Support
-
-For support, issues, or feature requests:
-- Create an issue on GitHub
-- Contact the maintainer
-- Check the documentation
-
----
-
-**Happy Billing! 🍽️✨**
