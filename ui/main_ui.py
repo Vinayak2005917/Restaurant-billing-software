@@ -52,7 +52,7 @@ with st.sidebar:
         st.session_state.page = "logout"
 
 # Main UI: Dine In and Take Away buttons only here
-st.title("🍽️ Restaurant Billing Software")
+st.title("🍽️ Add a New order!!")
 st.markdown("### Please select an option:")
 
 col1, col2, col3 = st.columns([1, 2, 1])

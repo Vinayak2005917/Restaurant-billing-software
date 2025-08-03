@@ -1,0 +1,1 @@
+when you click plus or minus, it should reduce or increse the stock number live
