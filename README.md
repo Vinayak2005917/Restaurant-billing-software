@@ -1,7 +1,7 @@
 
 # Restaurant Billing Software
 
-A comprehensive Streamlit-based restaurant billing system with role-based authentication, intuitive ordering workflows, payment processing with GST calculation, PDF receipt generation, and detailed sales reporting. Built for restaurants needing both dine-in and take-away management with a professional admin panel.
+A Streamlit-based restaurant billing system with role-based auth, intuitive ordering (Dine-in & Take-away), live stock control, payments with GST, PDF receipts, and sales reports. Includes an Admin panel for stock and cashier management.
 
 ## 📋 Table of Contents
 - [Features](#features)
@@ -18,56 +18,44 @@ A comprehensive Streamlit-based restaurant billing system with role-based authen
 
 ## ✨ Features
 
-### 🔐 **Authentication & Role Management**
-- **Login System**: Role-based access with demo credentials (`admin/admin`, `cashier/cashier`)
-- **Admin Role**: Access to admin panel, file uploads, system management
-- **Cashier Role**: Access to order management and reports
-- **Quick Access**: Bypass login buttons for demo/development purposes
-- **Session Management**: Persistent login state across pages
+### 🔐 Authentication & Role Management
+- Admin shortcut: `admin/admin`
+- Cashier login: validated against `data/cashier_list.csv` (columns: `username, full_name, password`)
+- Roles: Admin → Admin Panel; Cashier → New Order & Reports
+- Optional Quick Access buttons for development
+- Session state persists auth across pages
 
-### 🛒 **Order Management**
-- **Dine-in Orders**: 
-  - Custom numeric keypad for table number entry
-  - Table number validation and display
-  - Table-specific order tracking
-- **Take-away Orders**: Streamlined ordering without table assignment
-- **Live Shopping Cart**: 
-  - Real-time quantity updates with +/- controls
-  - Running totals and item counts
-  - Clear cart and trash order functionality
-- **Menu Search**: Filter items by name or description
-- **Stock Display**: Show available inventory for each item
+### 🛒 Order Management
+- Dine-in: keypad for table numbers with validation
+- Take-away: streamlined flow
+- Live cart: +/- quantity, totals, clear cart
+- Search: by name/description
+- Live stock display and caps while ordering
 
-### 💳 **Payment & Billing System**
-- **Payment Methods**: UPI (with QR code), Cash, and Card payments
-- **GST Calculation**: Automatic 5% GST calculation and display
-- **Order Summary**: Detailed breakdown before payment confirmation
-- **PDF Receipt Generation**: Downloadable receipts using FPDF
-- **Order Tracking**: Unique order numbers (ORD##### format)
-- **Sales Persistence**: All orders saved to CSV for reporting
+### 💳 Payment & Billing
+- Methods: UPI, Cash, Card
+- GST: 5% calculation
+- Order summary & confirmation
+- PDF receipt via FPDF2
+- Unique order numbers (ORD#####)
+- Sales persisted to `data/sales_report.csv`
 
-### 📊 **Reports & Analytics**
-- **Sales Dashboard**: 
-  - Total orders, revenue, and items sold
-  - Average order value calculations
-  - Order type distribution charts
-- **Order History**: Complete transaction records with search/sort
-- **Data Visualization**: Revenue by order type, order distribution
-- **Real-time Updates**: Live data from sales_report.csv
+### 📊 Reports & Analytics
+- KPIs: total orders, revenue, items sold, AOV
+- Order history table
+- Charts for order/revenue distribution
+- Real-time from `sales_report.csv`
 
-### 🔧 **Admin Panel**
-- **File Upload System**: Support for CSV, Excel, Text, and JSON files
-- **Data Preview**: Preview uploaded files before saving
-- **Auto-conversion**: Excel files automatically converted to CSV
-- **File Management**: Save uploaded files to data directory
-- **System Statistics**: Quick metrics dashboard
+### 🔧 Admin Panel
+- Manage Stock (per-item +/- with Save button; search items)
+- Cashiers (add/remove persisted to `data/cashier_list.csv`)
+- File upload & preview (CSV/Excel/JSON/TXT)
+- Quick stats
 
-### 🎨 **User Interface**
-- **Clean Design**: Modern, professional Streamlit interface
-- **Responsive Layout**: Wide layout for optimal screen usage
-- **Hidden Navigation**: Streamlined interface with hidden default menus
-- **Context-Sensitive UI**: Payment page hides sidebar for focus
-- **Custom Styling**: CSS customizations for better UX
+### 🎨 User Interface
+- Wide layout, clean styling with custom CSS
+- Hidden default menu/sidebar where appropriate
+- Focused payment page
 
 ## 🏗️ Architecture Overview
 
@@ -106,108 +94,101 @@ A comprehensive Streamlit-based restaurant billing system with role-based authen
 - **Responsive Layout**: Works on different screen sizes
 
 ### Prerequisites
+- Python 3.10+
+- pip
 
-### Setup Instructions
-   ```bash
-   git clone https://github.com/Vinayak2005917/Restaurant-billing-software.git
-   cd Restaurant-billing-software
-   ```
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Setup
+```powershell
+git clone https://github.com/Vinayak2005917/Restaurant-billing-software.git
+cd "Restaurant-billing-software"
+pip install -r requirements.txt
+```
 
-3. **Create data directory** (if not exists)
-   ```bash
-   mkdir data
-   ```
-
-4. **Add menu data**
-   - Create `data/menu.csv` with your menu items
-   - Sample format:
-     ```csv
-     item_id,item_name,stock,short_description,price
-     1,Margherita Pizza,20,Classic cheese and tomato pizza,299
-     2,Paneer Tikka,15,Grilled cottage cheese with spices,249
-     ```
+Create `data/` if missing and add menu data:
+```csv
+item_id,item_name,stock,short_description,price
+1,Margherita Pizza,20,Classic cheese and tomato pizza,299
+2,Paneer Tikka,15,Grilled cottage cheese with spices,249
+```
+Optional: seed `data/cashier_list.csv` with:
+```csv
+username,full_name,password
+cashier01,Aarav Sharma,Pass@123
+```
 
 ## 🖥️ Usage
 
-### Starting the Application
-```bash
-pip install -r requirements.txt
+### Start the app
+```powershell
 streamlit run app.py
-
-Or, for development, run from the `ui` folder:
-```bash
-cd ui
 ```
-
-The application will open in your default web browser at `http://localhost:8501`
+The app opens at http://localhost:8501
 
 ### Basic Workflow
 
-1. **Select Order Type**: Choose between Dine-in or Take-away
-4. **Add to Cart**: Use +/- buttons to adjust quantities
-5. **Review Order**: Check cart in sidebar
-8. **Download PDF Receipt**: After payment, download your bill
-9. **View Reports**: Access sales data and analytics
-- **Order Pages**: `dine_in.py`, `take_away.py` — Menu browsing and cart management
-- **Payments**: `payments.py` — Payment and PDF receipt
-- **Reports**: `reports.py` — Sales analytics and order history
-- **Sidebar**: Staff info and navigation controls
+1) Login
+- Admin: `admin/admin` → Admin Panel
+- Cashier: any row from `data/cashier_list.csv` → New Order
+
+2) New Order → choose Dine-in or Take-away, add items with +/- (stock-limited)
+
+3) Payments → choose UPI/Cash/Card; confirm to persist sale and decrement stock in `menu.csv`; download PDF
+
+4) Reports → view KPIs and sales table
+
+5) Admin Settings →
+- Manage Stock: search items, adjust with +/- and save per item
+- Cashiers: add/remove users (username, full name, password)
 
 ## 📁 Project Structure
 
 ```
 Restaurant-billing-software/
+├── app.py
 ├── README.md
 ├── requirements.txt
 ├── data/
-│   ├── menu.csv                 # Menu items database
-│   └── sales_report.csv         # Sales data (auto-generated)
+│   ├── menu.csv
+│   ├── sales_report.csv
+│   └── cashier_list.csv
+├── db/
+│   └── user_settings.json
 ├── ui/
-│   ├── main_ui.py              # Main Streamlit UI (entry point for development)
+│   ├── login.py
 │   └── pages/
-│       ├── dine_in.py          # Dine-in ordering interface
-│       ├── take_away.py        # Take-away ordering interface
-│       ├── payments.py         # Payment and PDF receipt logic
-│       └── reports.py          # Sales reports and analytics
+│       ├── admin.py
+│       ├── admin_setting.py
+│       ├── user_settings.py
+│       ├── new order.py
+│       ├── dine_in.py
+│       ├── take_away.py
+│       ├── payments.py
+│       └── reports.py
 └── utils/
-    └── keyboard.py             # (empty placeholder for future utilities)
+  └── keyboard.py
 ```
 
 ## ⚙️ Configuration
 
-### Menu Configuration
-- `price`: Item price (required)
+### Data & Config
+- `data/menu.csv`: item_id, item_name, stock, short_description, price
+- `data/sales_report.csv`: auto-generated sales records
+- `data/cashier_list.csv`: username, full_name, password (plain text)
+- `db/user_settings.json`: per-user settings (names, etc.)
 
-
-- Menu display with search functionality
-- Real-time cart updates
-- Item quantity controls
-
-- Payment mode selection (UPI, Cash, Card)
-- PDF receipt download after payment
-### Reports Dashboard
-- Complete order history
-- Analytics charts
-- Data visualization
+Stock handling:
+- Live stock display and caps on order pages
+- Stock decremented on payment confirmation and saved back to `menu.csv`
 
 ## 🛠️ Technical Details
 
 ### Built With
-- **Streamlit**: Web application framework (UI, navigation, state)
-- **Pandas**: Data manipulation and analysis (menu, sales, reporting)
-- **FPDF**: PDF receipt generation (downloadable bills)
-- **Python**: Core programming language
-- **Session State Management**: Maintains cart, navigation, and order state across all pages
-- **Dynamic Navigation**: Uses `st.switch_page` and session state for multi-page flow
-- **PDF Generation**: Downloadable receipts after payment (with itemized split, total, payment method, order number)
-- **Order Type Tracking**: Accurate Dine-in/Take-away reporting in all flows
-- **Sales Reporting**: Real-time analytics and CSV export
-- **UI/UX**: Custom CSS, sidebar logic, and responsive layout
-- **Error Handling**: Graceful error management and user feedback
-- **Data Validation**: Input sanitization and validation
+- Streamlit, Pandas, FPDF2, Python 3.10+
+- Session state, multi-page nav via `st.switch_page`
+- CSV persistence for data
+
+Security note:
+- Cashier passwords are stored in plain text for demo simplicity. Consider hashing for production.
 
 ## 🤝 Contributing
 
