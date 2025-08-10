@@ -42,10 +42,12 @@ with st.sidebar:
 
     if st.button("Reports"):
         st.session_state.page = "reports"
+        st.switch_page("pages/reports.py")
     if st.button("Log Out"):
         st.session_state.page = "logout"
+        st.switch_page("login.py")
     if st.button("Settings"):
-        st.session_state.page = "settings"
+        st.switch_page("pages/user_settings.py")
 
 # Main UI: Dine In and Take Away buttons only here
 st.title("🍽️ Add a New order!!")
@@ -66,7 +68,7 @@ page = st.session_state.get("page", "home")
 if page == "reports":
     st.switch_page("pages/reports.py")
 elif page == "settings":
-    st.write("Under work!")
+    st.switch_page("pages/user_settings.py")
 elif page == "logout":
     # Clear session state and redirect to login
     for key in list(st.session_state.keys()):

@@ -1,21 +1,101 @@
 
 # Restaurant Billing Software
 
-A modern, user-friendly restaurant billing system built with Streamlit. Supports dine-in and take-away orders, robust cart and checkout logic, payment workflow, PDF receipt download, and sales reporting.
+A comprehensive Streamlit-based restaurant billing system with role-based authentication, intuitive ordering workflows, payment processing with GST calculation, PDF receipt generation, and detailed sales reporting. Built for restaurants needing both dine-in and take-away management with a professional admin panel.
 
 ## 📋 Table of Contents
 - [Features](#features)
+- [Architecture Overview](#architecture-overview)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Configuration](#configuration)
-- [Screenshots](#screenshots)
+- [Data Model & Storage](#data-model--storage)
+- [User Workflows](#user-workflows)
+- [Development Notes](#development-notes)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## ✨ Features
 
+### 🔐 **Authentication & Role Management**
+- **Login System**: Role-based access with demo credentials (`admin/admin`, `cashier/cashier`)
+- **Admin Role**: Access to admin panel, file uploads, system management
+- **Cashier Role**: Access to order management and reports
+- **Quick Access**: Bypass login buttons for demo/development purposes
+- **Session Management**: Persistent login state across pages
+
 ### 🛒 **Order Management**
+- **Dine-in Orders**: 
+  - Custom numeric keypad for table number entry
+  - Table number validation and display
+  - Table-specific order tracking
+- **Take-away Orders**: Streamlined ordering without table assignment
+- **Live Shopping Cart**: 
+  - Real-time quantity updates with +/- controls
+  - Running totals and item counts
+  - Clear cart and trash order functionality
+- **Menu Search**: Filter items by name or description
+- **Stock Display**: Show available inventory for each item
+
+### 💳 **Payment & Billing System**
+- **Payment Methods**: UPI (with QR code), Cash, and Card payments
+- **GST Calculation**: Automatic 5% GST calculation and display
+- **Order Summary**: Detailed breakdown before payment confirmation
+- **PDF Receipt Generation**: Downloadable receipts using FPDF
+- **Order Tracking**: Unique order numbers (ORD##### format)
+- **Sales Persistence**: All orders saved to CSV for reporting
+
+### 📊 **Reports & Analytics**
+- **Sales Dashboard**: 
+  - Total orders, revenue, and items sold
+  - Average order value calculations
+  - Order type distribution charts
+- **Order History**: Complete transaction records with search/sort
+- **Data Visualization**: Revenue by order type, order distribution
+- **Real-time Updates**: Live data from sales_report.csv
+
+### 🔧 **Admin Panel**
+- **File Upload System**: Support for CSV, Excel, Text, and JSON files
+- **Data Preview**: Preview uploaded files before saving
+- **Auto-conversion**: Excel files automatically converted to CSV
+- **File Management**: Save uploaded files to data directory
+- **System Statistics**: Quick metrics dashboard
+
+### 🎨 **User Interface**
+- **Clean Design**: Modern, professional Streamlit interface
+- **Responsive Layout**: Wide layout for optimal screen usage
+- **Hidden Navigation**: Streamlined interface with hidden default menus
+- **Context-Sensitive UI**: Payment page hides sidebar for focus
+- **Custom Styling**: CSS customizations for better UX
+
+## 🏗️ Architecture Overview
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Login Page    │ -> │  Role Routing   │ -> │ Admin / Cashier │
+│  (ui/login.py)  │    │                 │    │     Pages       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         v                       v                       v
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  New Order      │ -> │ Dine-in / Take  │ -> │   Payment &     │
+│ (new order.py)  │    │    Away Pages   │    │ PDF Receipt     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                v                       v
+                     ┌─────────────────┐    ┌─────────────────┐
+                     │  Cart Management│    │  Sales Reports  │
+                     │ (Session State) │    │ (reports.py)    │
+                     └─────────────────┘    └─────────────────┘
+```
+
+**Core Technologies:**
+- **Frontend**: Streamlit with custom CSS
+- **Data Processing**: Pandas for CSV operations
+- **PDF Generation**: FPDF2 for receipt creation
+- **Session Management**: Streamlit session state
+- **File Storage**: CSV files for data persistence
 - **Order Numbering**: Unique order IDs (ORD12345 format)
 - **Price Calculation**: Automatic totals with item breakdown
 - **Sales Tracking**: All orders saved to CSV for reporting

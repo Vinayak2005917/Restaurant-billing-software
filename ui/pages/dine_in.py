@@ -174,6 +174,25 @@ if st.session_state.table_number_entered:
                 description = item.get('short_description', '').lower()
                 if search_query.lower() not in item_name and search_query.lower() not in description:
                     continue  # Skip this item if it doesn't match search
+            # Prepare identifiers and ensure cart entry exists before rendering
+            display_name = item.get('item_name', f'Item {index+1}')
+            item_key = f"item_{index}_{display_name}"
+            # Initialize quantity for this item in session cart
+            if item_key not in st.session_state.cart:
+                st.session_state.cart[item_key] = {
+                    'quantity': 0,
+                    'name': display_name,
+                    'price': item.get('price', 100)
+                }
+
+            # Determine stock (if provided)
+            stock_val = None
+            if 'stock' in item and pd.notna(item['stock']):
+                try:
+                    stock_val = int(item['stock'])
+                except Exception:
+                    stock_val = None
+
             # Create the styled container for each menu item
             st.markdown('<div class="menu-item">', unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1, 3, 2])
@@ -185,26 +204,18 @@ if st.session_state.table_number_entered:
                     st.markdown("<div style='text-align: center; font-size: 60px;'>🍽️</div>", unsafe_allow_html=True)
             with col2:
                 # Item name and description
-                item_name = item.get('item_name', f'Item {index+1}')
-                st.markdown(f"**{item_name}**")
+                st.markdown(f"**{display_name}**")
                 if 'short_description' in item and pd.notna(item['short_description']):
                     st.markdown(f"<small>{item['short_description']}</small>", unsafe_allow_html=True)
-                # Since there's no price column, show stock instead
-                if 'stock' in item and pd.notna(item['stock']):
-                    st.markdown(f"**Stock: {item['stock']} available**")
+                # Show remaining stock live (stock - selected qty)
+                if stock_val is not None:
+                    remaining = max(0, stock_val - st.session_state.cart[item_key]['quantity'])
+                    st.markdown(f"**Stock: {remaining} available**")
                 # Use actual price if available, otherwise default
                 item_price = item.get('price', 100)  # Default price for demo
                 st.markdown(f"**Price: ₹{item_price}**")
             with col3:
                 # Quantity controls
-                item_key = f"item_{index}_{item_name}"
-                # Initialize quantity for this item
-                if item_key not in st.session_state.cart:
-                    st.session_state.cart[item_key] = {
-                        'quantity': 0,
-                        'name': item_name,
-                        'price': item.get('price', 100)  # Use actual price or default
-                    }
                 # Create columns for minus, quantity, plus
                 minus_col, qty_col, plus_col = st.columns([1, 1, 1])
                 with minus_col:
@@ -216,7 +227,11 @@ if st.session_state.table_number_entered:
                     st.markdown(f"<div style='text-align: center; font-size: 18px; font-weight: bold;'>{st.session_state.cart[item_key]['quantity']}</div>", unsafe_allow_html=True)
                 with plus_col:
                     if st.button("➕", key=f"plus_{item_key}"):
-                        st.session_state.cart[item_key]['quantity'] += 1
+                        # Enforce stock limit if stock present
+                        current_qty = st.session_state.cart[item_key]['quantity']
+                        if stock_val is None or current_qty < stock_val:
+                            st.session_state.cart[item_key]['quantity'] += 1
+                        # else: do not exceed stock
                         st.rerun()  # Force immediate rerun
             # Close the menu-item div
             st.markdown('</div>', unsafe_allow_html=True)

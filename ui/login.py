@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+import os
 
 st.set_page_config(page_title="Restaurant Billing Software - Login", layout="centered")
 
@@ -74,32 +76,47 @@ with col2:
         login_button = st.form_submit_button("🔐 Login")
         
         if login_button:
-            # For now, just dummy validation
-            if username and password:
+            if not username or not password:
+                st.error("Please enter both username and password")
+            else:
+                # Admin shortcut
                 if username == "admin" and password == "admin":
                     st.success("Admin login successful! Redirecting to admin panel...")
-                    # Store login state in session
                     st.session_state.logged_in = True
                     st.session_state.username = username
                     st.session_state.user_role = "admin"
-                    # Redirect to admin page
                     st.switch_page("pages/admin.py")
-                elif username == "cashier" and password == "cashier":
-                    st.success("Cashier login successful! Redirecting to new order...")
-                    # Store login state in session
-                    st.session_state.logged_in = True
-                    st.session_state.username = username
-                    st.session_state.user_role = "cashier"
-                    # Redirect to new order page
-                    st.switch_page("pages/new order.py")
                 else:
-                    st.error("Invalid username or password. Try 'admin'/'admin' or 'cashier'/'cashier'")
-            else:
-                st.error("Please enter both username and password")
+                    # Validate against data/cashier_list.csv
+                    try:
+                        current_dir = os.path.dirname(os.path.abspath(__file__))
+                        project_root = os.path.dirname(current_dir)
+                        cashier_path = os.path.join(project_root, "data", "cashier_list.csv")
+
+                        if not os.path.exists(cashier_path) or os.path.getsize(cashier_path) == 0:
+                            st.error("No cashier records found. Please contact admin.")
+                        else:
+                            df = pd.read_csv(cashier_path)
+                            if 'username' not in df.columns or 'password' not in df.columns:
+                                st.error("User store is misconfigured. Missing 'username' or 'password'.")
+                            else:
+                                match = df[(df['username'].astype(str) == str(username)) & (df['password'].astype(str) == str(password))]
+                                if not match.empty:
+                                    rec = match.iloc[0]
+                                    st.success("Login successful! Redirecting to new order...")
+                                    st.session_state.logged_in = True
+                                    st.session_state.username = str(rec.get('username', username))
+                                    st.session_state.full_name = str(rec.get('full_name', username))
+                                    st.session_state.user_role = "cashier"
+                                    st.switch_page("pages/new order.py")
+                                else:
+                                    st.error("Invalid username or password.")
+                    except Exception as e:
+                        st.error(f"Login failed: {e}")
     
     # Direct access buttons
     st.markdown("---")
-    st.markdown('<p style="text-align: center; color: #666; margin-bottom: 1rem;">Quick Access (No Login Required)</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #666; margin-bottom: 1rem;">Dev Tool : Quick Access (No Login Required)</p>', unsafe_allow_html=True)
     
     col_admin, col_cashier = st.columns(2)
     

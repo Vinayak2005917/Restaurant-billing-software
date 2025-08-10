@@ -34,6 +34,37 @@ table_number = st.session_state.get("table_number", "")
 total_price = st.session_state.get("total_price", 0.0)
 total_items = st.session_state.get("total_items", 0)
 
+# Helper: decrement stock in data/menu.csv for items in cart
+def decrement_menu_stock(cart_items):
+    try:
+        menu_path = os.path.join(project_root, "data", "menu.csv")
+        if not os.path.exists(menu_path):
+            return False, "menu.csv not found"
+        df = pd.read_csv(menu_path)
+        if 'item_name' not in df.columns or 'stock' not in df.columns:
+            return False, "menu.csv missing required columns"
+        # Build a quick lookup for current stocks
+        for _, item in list(cart_items.items()):
+            qty = int(item.get('quantity', 0) or 0)
+            if qty <= 0:
+                continue
+            name = item.get('name')
+            if not name:
+                continue
+            mask = df['item_name'] == name
+            if mask.any():
+                try:
+                    current_stock = int(pd.to_numeric(df.loc[mask, 'stock']).iloc[0])
+                except Exception:
+                    # If stock not numeric, skip updating that row
+                    continue
+                new_stock = max(0, current_stock - qty)
+                df.loc[mask, 'stock'] = new_stock
+        df.to_csv(menu_path, index=False)
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
 # Determine order type based on the source page or table_number format
 # If table_number is a number, it's dine-in; if it's text, it's take-away
 order_type = "Take-away"
@@ -145,6 +176,10 @@ if st.session_state['payment_mode'] == "UPI":
                         pd.DataFrame(csv_data).to_csv(csv_path, index=False)
                 else:
                     pd.DataFrame(csv_data).to_csv(csv_path, index=False)
+                # Decrement stock in menu.csv now that payment is confirmed
+                ok, err = decrement_menu_stock(cart)
+                if not ok and err:
+                    st.warning(f"Stock update skipped: {err}")
                 # Store order info in session for PDF download
                 st.session_state['last_order'] = {
                     'order_number': order_number,
@@ -166,7 +201,7 @@ elif st.session_state['payment_mode'] == "Cash":
         if not cart:
             st.warning("Cart is empty.")
             st.session_state.page = "home"
-            st.switch_page("pages/new.py")
+            st.switch_page("pages/new order.py")
         else:
             final_total = st.session_state.get('final_total', total_price)
             order_number = f"ORD{random.randint(10000, 99999)}"
@@ -205,11 +240,15 @@ elif st.session_state['payment_mode'] == "Cash":
                         pd.DataFrame(csv_data).to_csv(csv_path, index=False)
                 else:
                     pd.DataFrame(csv_data).to_csv(csv_path, index=False)
+                # Decrement stock for confirmed order
+                ok, err = decrement_menu_stock(cart)
+                if not ok and err:
+                    st.warning(f"Stock update skipped: {err}")
                 st.session_state['last_order'] = {
                     'order_number': order_number,
                     'table_number': table_number,
                     'total_price': final_total,
-                    'subtotal': st.session_state.get('subtotal', total_price),
+                    'subtotal': st.session_state.get('subtotal', final_total),
                     'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
@@ -265,6 +304,10 @@ elif st.session_state['payment_mode'] == "Card":
                         pd.DataFrame(csv_data).to_csv(csv_path, index=False)
                 else:
                     pd.DataFrame(csv_data).to_csv(csv_path, index=False)
+                # Decrement stock for confirmed order
+                ok, err = decrement_menu_stock(cart)
+                if not ok and err:
+                    st.warning(f"Stock update skipped: {err}")
                 st.session_state['last_order'] = {
                     'order_number': order_number,
                     'table_number': table_number,

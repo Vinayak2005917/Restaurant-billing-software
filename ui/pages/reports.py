@@ -33,7 +33,7 @@ remove_sidebar_padding = """
 st.markdown(remove_sidebar_padding, unsafe_allow_html=True)
 st.markdown(hide_default_page_menu, unsafe_allow_html=True)
 
-# Sidebar content (same as main_ui.py)
+# Sidebar content (same as pages/new order.py)
 with st.sidebar:
     st.markdown("### 👨‍💼 Staff Info")
     st.write("**Name:** Vinayak Mishra")
@@ -43,13 +43,12 @@ with st.sidebar:
 
     if st.button("New Order"):
         st.session_state.page = "home"
-        st.switch_page("main_ui.py")
-    if st.button("Order History"):
-        st.session_state.page = "history"
-        st.switch_page("main_ui.py")
+        st.switch_page("pages/new order.py")
+    if st.button("Settings"):
+        st.switch_page("pages/user_settings.py")
     if st.button("Log Out"):
         st.session_state.page = "logout"
-        st.switch_page("main_ui.py")
+        st.switch_page("pages/new order.py")
 
 st.markdown("---")
 

@@ -51,10 +51,7 @@ with st.sidebar:
         st.switch_page("pages/reports.py")
     
     if st.button("⚙️ Settings", use_container_width=True):
-        st.info("Settings page - Coming Soon!")
-    
-    if st.button("👥 Cashier List", use_container_width=True):
-        st.info("Cashier management - Coming Soon!")
+        st.switch_page("pages/admin_setting.py")
     
     st.markdown("---")
     
