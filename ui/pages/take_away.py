@@ -84,7 +84,7 @@ if st.sidebar.button("Trash current order"):
     # Clear the cart
     if 'cart' in st.session_state:
         st.session_state.cart = {}
-    st.switch_page("./main_ui.py")
+    st.switch_page("pages/new order.py")
 
 # Search option
 search_query = st.text_input("🔍 Search menu items...", placeholder="Search by name or description")

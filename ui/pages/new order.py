@@ -65,10 +65,10 @@ page = st.session_state.get("page", "home")
 
 if page == "reports":
     st.switch_page("pages/reports.py")
-    # Your Reports UI here
 elif page == "settings":
-    st.subheader("⚙️ Settings")
-    # Your Settings UI here
+    st.write("Under work!")
 elif page == "logout":
-    st.subheader("🚪 Logged Out")
-    st.write("You have been logged out. Close the app or log in again.")
+    # Clear session state and redirect to login
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.switch_page("login.py")

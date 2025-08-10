@@ -1,12 +1,22 @@
 Order_Number,Order_Type,Table_Number,Total_Amount,Total_Items,Items_Detail,Timestamp
-ORD56966,Dine-in,41,897,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-03 21:28:55
-ORD90890,Dine-in,1,897,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-03 22:40:20
-ORD59907,Dine-in,5,897,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-03 22:45:29
-ORD87710,Dine-in,5,497,3,Margherita Pizza x 1 = ₹299.00 | Masala Dosa x 1 = ₹149.00 | Lemonade x 1 = ₹49.00,2025-08-03 22:54:28
-ORD31023,Dine-in,1,626,4,Lemonade x 1 = ₹49.00 | Chocolate Brownie x 1 = ₹129.00 | Tandoori Chicken x 1 = ₹299.00 | Spring Rolls x 1 = ₹149.00,2025-08-03 23:26:35
-ORD35231,Dine-in,2,765,5,Masala Dosa x 1 = ₹149.00 | Cold Coffee x 1 = ₹89.00 | Chocolate Brownie x 1 = ₹129.00 | Veg Burger x 2 = ₹398.00,2025-08-04 01:44:51
-ORD14652,Dine-in,1,1095,5,Margherita Pizza x 1 = ₹299.00 | Chicken Biryani x 1 = ₹349.00 | Chole Bhature x 2 = ₹358.00 | Cold Coffee x 1 = ₹89.00,2025-08-04 02:04:46
-ORD52897,Take-away,Take-away,1025,5,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Masala Dosa x 2 = ₹298.00 | Chole Bhature x 1 = ₹179.00,2025-08-04 02:10:37
-ORD79428,Take-away,Take-away,776,4,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chole Bhature x 1 = ₹179.00 | Lemonade x 1 = ₹49.00,2025-08-04 02:14:01
-ORD46130,Take-away,Take-away,477,3,Margherita Pizza x 1 = ₹299.00 | Cold Coffee x 2 = ₹178.00,2025-08-04 02:15:40
-ORD62098,Take-away,Take-away,537,3,Chole Bhature x 3 = ₹537.00,2025-08-04 02:17:04
+ORD56966,Dine-in,41,897.0,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-03 21:28:55
+ORD90890,Dine-in,1,897.0,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-03 22:40:20
+ORD59907,Dine-in,5,897.0,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-03 22:45:29
+ORD87710,Dine-in,5,497.0,3,Margherita Pizza x 1 = ₹299.00 | Masala Dosa x 1 = ₹149.00 | Lemonade x 1 = ₹49.00,2025-08-03 22:54:28
+ORD31023,Dine-in,1,626.0,4,Lemonade x 1 = ₹49.00 | Chocolate Brownie x 1 = ₹129.00 | Tandoori Chicken x 1 = ₹299.00 | Spring Rolls x 1 = ₹149.00,2025-08-03 23:26:35
+ORD35231,Dine-in,2,765.0,5,Masala Dosa x 1 = ₹149.00 | Cold Coffee x 1 = ₹89.00 | Chocolate Brownie x 1 = ₹129.00 | Veg Burger x 2 = ₹398.00,2025-08-04 01:44:51
+ORD14652,Dine-in,1,1095.0,5,Margherita Pizza x 1 = ₹299.00 | Chicken Biryani x 1 = ₹349.00 | Chole Bhature x 2 = ₹358.00 | Cold Coffee x 1 = ₹89.00,2025-08-04 02:04:46
+ORD52897,Take-away,Take-away,1025.0,5,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Masala Dosa x 2 = ₹298.00 | Chole Bhature x 1 = ₹179.00,2025-08-04 02:10:37
+ORD79428,Take-away,Take-away,776.0,4,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chole Bhature x 1 = ₹179.00 | Lemonade x 1 = ₹49.00,2025-08-04 02:14:01
+ORD46130,Take-away,Take-away,477.0,3,Margherita Pizza x 1 = ₹299.00 | Cold Coffee x 2 = ₹178.00,2025-08-04 02:15:40
+ORD62098,Take-away,Take-away,537.0,3,Chole Bhature x 3 = ₹537.00,2025-08-04 02:17:04
+ORD43325,Take-away,Take-away,897.0,3,Margherita Pizza x 3 = ₹897.00,2025-08-04 02:22:54
+ORD53246,Take-away,Take-away,258.0,2,Chocolate Brownie x 2 = ₹258.00,2025-08-04 02:26:11
+ORD33442,Dine-in,5,548.0,2,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00,2025-08-04 14:40:18
+ORD68802,Dine-in,12,897.0,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-04 14:52:13
+ORD83573,Dine-in,12,897.0,3,Margherita Pizza x 1 = ₹299.00 | Paneer Tikka x 1 = ₹249.00 | Chicken Biryani x 1 = ₹349.00,2025-08-07 00:03:33
+ORD55756,Take-away,Take-away,598.0,2,Margherita Pizza x 2 = ₹598.00,2025-08-07 00:35:44
+ORD95881,Take-away,Take-away,627.9,2,Margherita Pizza x 2 = ₹598.00,2025-08-07 00:37:24
+ORD48478,Dine-in,12,500.85,3,Masala Dosa x 2 = ₹298.00 | Chole Bhature x 1 = ₹179.00,2025-08-11 02:50:20
+ORD81257,Take-away,Take-away,522.9,2,Paneer Tikka x 2 = ₹498.00,2025-08-11 02:51:08
+ORD35080,Take-away,Take-away,217.35,3,Butter Naan x 1 = ₹49.00 | Mango Lassi x 2 = ₹158.00,2025-08-11 02:52:43

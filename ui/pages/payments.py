@@ -51,7 +51,8 @@ except (ValueError, TypeError):
 # Check if cart is empty and redirect
 if not cart or total_items == 0:
     st.warning("Cart is empty. Redirecting to main page...")
-    st.switch_page("ui/main_ui.py")
+    st.session_state.page = "home"
+    st.switch_page("pages/new order.py")
 
 
 # ---- Show order summary before payment confirmation (above payment mode buttons, plain text) ----
@@ -60,10 +61,27 @@ if cart:
     for item in cart.values():
         if item["quantity"] > 0:
             summary_lines.append(f"- {item['name']} x {item['quantity']} = ₹{item['quantity'] * item['price']:.2f}")
+
 if summary_lines:
     st.markdown("**Order Summary**", unsafe_allow_html=True)
     st.markdown("\n".join(summary_lines))
-    st.markdown(f"**Total Items:** {total_items}  |  **Total Amount:** ₹{total_price:.2f}")
+    
+    # Calculate subtotal, GST, and total
+    subtotal = total_price
+    gst_rate = 0.05  # 5% GST
+    gst_amount = subtotal * gst_rate
+    final_total = subtotal + gst_amount
+    
+    st.markdown("---")
+    st.markdown(f"**Subtotal:** ₹{subtotal:.2f}")
+    st.markdown(f"**GST (5%):** ₹{gst_amount:.2f}")
+    st.markdown(f"**Final Total:** ₹{final_total:.2f}")
+    st.markdown(f"**Total Items:** {total_items}")
+    
+    # Update session state with final total for payment processing
+    st.session_state.final_total = final_total
+    st.session_state.gst_amount = gst_amount
+    st.session_state.subtotal = subtotal
 
 # Ensure payment_mode is always initialized
 if 'payment_mode' not in st.session_state:
@@ -88,15 +106,16 @@ if st.session_state['payment_mode'] == "UPI":
     if st.button("✅ Confirm UPI Payment", use_container_width=True, key="confirm_upi"):
         if not cart:
             st.warning("Cart is empty.")
-            st.switch_page("ui/main_ui.py")
+            st.switch_page("pages/new order.py")
         else:
+            final_total = st.session_state.get('final_total', total_price)
             order_number = f"ORD{random.randint(10000, 99999)}"
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             order_data = {
                 'order_number': order_number,
                 'order_type': order_type,
                 'table_number': table_number,
-                'total_amount': total_price,
+                'total_amount': final_total,
                 'total_items': total_items,
                 'timestamp': timestamp,
                 'items_detail': []
@@ -110,7 +129,7 @@ if st.session_state['payment_mode'] == "UPI":
                 'Order_Number': [order_number],
                 'Order_Type': [order_type],
                 'Table_Number': [table_number],
-                'Total_Amount': [total_price],
+                'Total_Amount': [final_total],
                 'Total_Items': [total_items],
                 'Items_Detail': [items_string],
                 'Timestamp': [timestamp]
@@ -130,7 +149,9 @@ if st.session_state['payment_mode'] == "UPI":
                 st.session_state['last_order'] = {
                     'order_number': order_number,
                     'table_number': table_number,
-                    'total_price': total_price,
+                    'total_price': final_total,
+                    'subtotal': st.session_state.get('subtotal', total_price),
+                    'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
                     'payment_mode': st.session_state.payment_mode
@@ -144,15 +165,17 @@ elif st.session_state['payment_mode'] == "Cash":
     if st.button("✅ Confirm Cash Payment", use_container_width=True, key="confirm_cash"):
         if not cart:
             st.warning("Cart is empty.")
-            st.switch_page("ui/main_ui.py")
+            st.session_state.page = "home"
+            st.switch_page("pages/new.py")
         else:
+            final_total = st.session_state.get('final_total', total_price)
             order_number = f"ORD{random.randint(10000, 99999)}"
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             order_data = {
                 'order_number': order_number,
                 'order_type': order_type,
                 'table_number': table_number,
-                'total_amount': total_price,
+                'total_amount': final_total,
                 'total_items': total_items,
                 'timestamp': timestamp,
                 'items_detail': []
@@ -166,7 +189,7 @@ elif st.session_state['payment_mode'] == "Cash":
                 'Order_Number': [order_number],
                 'Order_Type': [order_type],
                 'Table_Number': [table_number],
-                'Total_Amount': [total_price],
+                'Total_Amount': [final_total],
                 'Total_Items': [total_items],
                 'Items_Detail': [items_string],
                 'Timestamp': [timestamp]
@@ -185,7 +208,9 @@ elif st.session_state['payment_mode'] == "Cash":
                 st.session_state['last_order'] = {
                     'order_number': order_number,
                     'table_number': table_number,
-                    'total_price': total_price,
+                    'total_price': final_total,
+                    'subtotal': st.session_state.get('subtotal', total_price),
+                    'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
                     'payment_mode': st.session_state.payment_mode
@@ -194,21 +219,23 @@ elif st.session_state['payment_mode'] == "Cash":
                 st.session_state.payment_mode = None
             except Exception as e:
                 st.error(f"❌ Error saving order: {str(e)}")
-                st.switch_page("ui/main_ui.py")
+                st.switch_page("pages/new order.py")
 
 elif st.session_state['payment_mode'] == "Card":
     if st.button("✅ Confirm Card Payment", use_container_width=True, key="confirm_card"):
         if not cart:
             st.warning("Cart is empty.")
-            st.switch_page("ui/main_ui.py")
+            st.session_state.page = "home"
+            st.switch_page("pages/new order.py")
         else:
+            final_total = st.session_state.get('final_total', total_price)
             order_number = f"ORD{random.randint(10000, 99999)}"
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             order_data = {
                 'order_number': order_number,
                 'order_type': order_type,
                 'table_number': table_number,
-                'total_amount': total_price,
+                'total_amount': final_total,
                 'total_items': total_items,
                 'timestamp': timestamp,
                 'items_detail': []
@@ -222,7 +249,7 @@ elif st.session_state['payment_mode'] == "Card":
                 'Order_Number': [order_number],
                 'Order_Type': [order_type],
                 'Table_Number': [table_number],
-                'Total_Amount': [total_price],
+                'Total_Amount': [final_total],
                 'Total_Items': [total_items],
                 'Items_Detail': [items_string],
                 'Timestamp': [timestamp]
@@ -241,7 +268,9 @@ elif st.session_state['payment_mode'] == "Card":
                 st.session_state['last_order'] = {
                     'order_number': order_number,
                     'table_number': table_number,
-                    'total_price': total_price,
+                    'total_price': final_total,
+                    'subtotal': st.session_state.get('subtotal', total_price),
+                    'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
                     'payment_mode': st.session_state.payment_mode
@@ -250,33 +279,89 @@ elif st.session_state['payment_mode'] == "Card":
                 st.session_state.payment_mode = None
             except Exception as e:
                 st.error(f"❌ Error saving order: {str(e)}")
-                st.switch_page("ui/main_ui.py")
+                st.session_state.page = "home"
+                st.switch_page("pages/new order.py")
 
 # ---- Show PDF download and summary after payment ----
 if st.session_state.get('show_pdf') and st.session_state.get('last_order'):
     order = st.session_state['last_order']
     st.success(f"✅ Order {order['order_number']} placed successfully!")
+    
+    # Get GST details for display
+    subtotal = order.get('subtotal', order['total_price'])
+    gst_amount = order.get('gst_amount', 0)
+    
     st.info(f"**Order Summary:**\n"
             f"- 🏷️ Order Number: {order['order_number']}\n"
             f"- 🍽️ Table: {order['table_number']}\n"
-            f"- 💰 Total: ₹{order['total_price']:.2f}\n"
+            f"- 💰 Subtotal: ₹{subtotal:.2f}\n"
+            f"- 📊 GST (5%): ₹{gst_amount:.2f}\n"
+            f"- 💰 Final Total: ₹{order['total_price']:.2f}\n"
             f"- 📦 Items: {order['total_items']}\n"
             f"- 🕒 Time: {order['timestamp']}\n"
             f"- 💳 Payment Mode: {order['payment_mode']}")
     from fpdf import FPDF
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=24)
-    pdf.cell(0, 20, "Restaurant Bill Receipt", ln=True, align="C")
-    # Add order details to PDF
+    pdf.set_font("Arial", size=20)
+    pdf.cell(0, 15, "Bill", ln=True, align="C")
     pdf.set_font("Arial", size=12)
+    pdf.ln(2)
     pdf.cell(0, 10, f"Order Number: {order['order_number']}", ln=True)
-    pdf.cell(0, 10, f"Table: {order['table_number']}", ln=True)
-    pdf.cell(0, 10, f"Total: Rs {order['total_price']:.2f}", ln=True)
-    pdf.cell(0, 10, f"Items: {order['total_items']}", ln=True)
+    pdf.cell(0, 10, f"Table/Customer: {order['table_number']}", ln=True)
     pdf.cell(0, 10, f"Time: {order['timestamp']}", ln=True)
-    pdf.cell(0, 10, f"Payment Mode: {order['payment_mode']}", ln=True)
+    pdf.ln(2)
+    pdf.set_font("Arial", style="B", size=12)
+    pdf.cell(80, 10, "Item", border=0)
+    pdf.cell(30, 10, "Qty", border=0)
+    pdf.cell(40, 10, "Price", border=0)
+    pdf.ln()
+    pdf.set_font("Arial", size=12)
+    # List all items in the order
+    items_detail = []
+    if 'items_detail' in order:
+        items_detail = order['items_detail']
+    else:
+        # Try to reconstruct from cart if not present
+        items_detail = []
+    # Try to get item details from sales_report.csv if not in session
+    if not items_detail:
+        try:
+            csv_path = os.path.join(project_root, "data", "sales_report.csv")
+            df = pd.read_csv(csv_path)
+            row = df[df['Order_Number'] == order['order_number']]
+            if not row.empty:
+                items_string = row.iloc[0]['Items_Detail']
+                items_detail = [x.strip() for x in items_string.split('|')]
+        except Exception:
+            pass
+    for item_line in items_detail:
+        # Try to parse: "Item x Qty = ₹Price" and replace ₹ with Rs for PDF compatibility
+        try:
+            name_qty, price = item_line.split('=')
+            name, qty = name_qty.rsplit('x', 1)
+            price_str = price.strip().replace('₹', 'Rs')
+            pdf.cell(80, 10, name.strip(), border=0)
+            pdf.cell(30, 10, qty.strip(), border=0)
+            pdf.cell(40, 10, price_str, border=0)
+            pdf.ln()
+        except Exception:
+            pdf.cell(0, 10, item_line.replace('₹', 'Rs'), ln=True)
+    pdf.ln(2)
+    pdf.set_font("Arial", style="B", size=12)
     
+    # Get GST details for PDF
+    subtotal = order.get('subtotal', order['total_price'])
+    gst_amount = order.get('gst_amount', 0)
+    
+    # Add billing breakdown with clear GST percentage
+    pdf.cell(0, 10, f"Subtotal: Rs {subtotal:.2f}", ln=True)
+    pdf.cell(0, 10, f"GST (5%): Rs {gst_amount:.2f}", ln=True)
+    pdf.cell(0, 10, "-" * 40, ln=True)
+    pdf.cell(0, 10, f"Total Amount: Rs {order['total_price']:.2f}", ln=True)
+    pdf.ln(2)
+    pdf.cell(0, 10, f"Payment Method: {order['payment_mode']}", ln=True)
+    pdf.cell(0, 10, f"Order Number: {order['order_number']}", ln=True)
     pdf_output = pdf.output(dest='S').encode('latin1')
     st.download_button(
         label="⬇️ Download PDF Receipt",
@@ -291,4 +376,4 @@ if st.session_state.get('show_pdf') and st.session_state.get('last_order'):
         st.session_state.show_pdf = False
         st.session_state.last_order = None
         st.session_state.page = "home"
-        st.switch_page("main_ui.py")
+        st.switch_page("pages/new order.py")

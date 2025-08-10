@@ -34,8 +34,58 @@ remove_sidebar_padding = """
 st.markdown(remove_sidebar_padding, unsafe_allow_html=True)
 st.markdown(hide_default_page_menu, unsafe_allow_html=True)
 
-#input feild for table number
-table_number = st.text_input("Enter Table Number", placeholder="e.g. 5")
+
+# --- Table Number Input with Numeric Keypad ---
+if 'table_number_entered' not in st.session_state:
+    st.session_state.table_number_entered = False
+if 'table_number_input' not in st.session_state:
+    st.session_state.table_number_input = ""
+
+def reset_table_number():
+    st.session_state.table_number_input = ""
+    st.session_state.table_number_entered = False
+
+# Show table number at top right if entered
+if st.session_state.table_number_entered:
+    st.markdown(f"<div style='position: absolute; top: 10px; right: 30px; font-size: 1.2em; font-weight: bold;'>Table: {st.session_state.table_number_input}</div>", unsafe_allow_html=True)
+
+# Show keypad if not entered
+if not st.session_state.table_number_entered:
+    st.markdown("<h4 style='text-align: left;'>Enter Table Number</h4>", unsafe_allow_html=True)
+    st.text_input("Table Number", value=st.session_state.table_number_input, key="table_number_display", disabled=True, label_visibility="collapsed")
+    # Make columns wider for buttons
+    cols = st.columns([2, 2, 2])
+    buttons = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "❌", "Enter"]
+    # Add custom CSS for button width
+    st.markdown("""
+        <style>
+        .stButton > button {
+            width: 100% !important;
+            min-width: 80px;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    for i in range(4):
+        row = st.columns([2, 2, 2])
+        for j in range(3):
+            idx = i*3 + j
+            if idx >= len(buttons):
+                continue
+            btn = buttons[idx]
+            with row[j]:
+                if st.button(btn, key=f"keypad_{btn}_{i}_{j}"):
+                    if btn.isdigit():
+                        st.session_state.table_number_input += btn
+                    elif btn == "❌":
+                        st.session_state.table_number_input = st.session_state.table_number_input[:-1]
+                    elif btn == "Enter":
+                        if st.session_state.table_number_input:
+                            st.session_state.table_number_entered = True
+                    st.rerun()
+
+
 
 with st.sidebar:
     st.markdown(f"<h1 style='text-align: center;'>🛒 Cart </h1>", unsafe_allow_html=True)
@@ -61,11 +111,11 @@ with st.sidebar:
             # Checkout button with functionality
             if st.button("🛒 Checkout", type="primary", use_container_width=True):
                 # Save table number and cart to session state before switching
-                st.session_state.table_number = table_number
+                st.session_state.table_number = st.session_state.table_number_input if st.session_state.table_number_entered else ""
                 st.session_state.total_items = total_items
                 st.session_state.total_price = total_price
                 # Only allow checkout if cart has items and table number is entered
-                if total_items > 0 and table_number:
+                if total_items > 0 and st.session_state.table_number_entered and st.session_state.table_number:
                     st.switch_page("pages/payments.py")
                 else:
                     st.warning("Please enter a table number and add items to the cart before checkout.")
@@ -85,27 +135,25 @@ if st.sidebar.button("Trash current order"):
     # Clear the cart
     if 'cart' in st.session_state:
         st.session_state.cart = {}
-    st.switch_page("./main_ui.py")
+    # Reset table number state
+    st.session_state.table_number_input = ""
+    st.session_state.table_number_entered = False
+    st.switch_page("pages/new order.py")
 
-if table_number:
+if st.session_state.table_number_entered:
     st.markdown(f"<h2 style='text-align: center;'>Menu</h2>", unsafe_allow_html=True)
-    
     # Search option
     search_query = st.text_input("🔍 Search menu items...", placeholder="Search by name or description")
-    
     # Menu
     try:
         # Acessing the Menu file
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(current_dir))
         menu_path = os.path.join(project_root, "data", "menu.csv")
-        
         menu_df = pd.read_csv(menu_path)
-
         # Initialize session state for cart
         if 'cart' not in st.session_state:
             st.session_state.cart = {}
-
         # Display the menu
         # Add CSS styling once at the beginning
         st.markdown("""
@@ -119,7 +167,6 @@ if table_number:
             }
             </style>
         """, unsafe_allow_html=True)
-        
         for index, item in menu_df.iterrows():
             # Filter items based on search query
             if search_query:
@@ -127,39 +174,30 @@ if table_number:
                 description = item.get('short_description', '').lower()
                 if search_query.lower() not in item_name and search_query.lower() not in description:
                     continue  # Skip this item if it doesn't match search
-            
             # Create the styled container for each menu item
             st.markdown('<div class="menu-item">', unsafe_allow_html=True)
-            
             col1, col2, col3 = st.columns([1, 3, 2])
-            
             with col1:
                 # Image placeholder (you can replace with actual image path)
                 if 'image' in item and pd.notna(item['image']):
                     st.image(item['image'], width=100)
                 else:
                     st.markdown("<div style='text-align: center; font-size: 60px;'>🍽️</div>", unsafe_allow_html=True)
-            
             with col2:
                 # Item name and description
                 item_name = item.get('item_name', f'Item {index+1}')
                 st.markdown(f"**{item_name}**")
-                
                 if 'short_description' in item and pd.notna(item['short_description']):
                     st.markdown(f"<small>{item['short_description']}</small>", unsafe_allow_html=True)
-                
                 # Since there's no price column, show stock instead
                 if 'stock' in item and pd.notna(item['stock']):
                     st.markdown(f"**Stock: {item['stock']} available**")
-                
                 # Use actual price if available, otherwise default
                 item_price = item.get('price', 100)  # Default price for demo
                 st.markdown(f"**Price: ₹{item_price}**")
-            
             with col3:
                 # Quantity controls
                 item_key = f"item_{index}_{item_name}"
-                
                 # Initialize quantity for this item
                 if item_key not in st.session_state.cart:
                     st.session_state.cart[item_key] = {
@@ -167,28 +205,22 @@ if table_number:
                         'name': item_name,
                         'price': item.get('price', 100)  # Use actual price or default
                     }
-                
                 # Create columns for minus, quantity, plus
                 minus_col, qty_col, plus_col = st.columns([1, 1, 1])
-                
                 with minus_col:
                     if st.button("➖", key=f"minus_{item_key}"):
                         if st.session_state.cart[item_key]['quantity'] > 0:
                             st.session_state.cart[item_key]['quantity'] -= 1
                             st.rerun()  # Force immediate rerun
-                
                 with qty_col:
                     st.markdown(f"<div style='text-align: center; font-size: 18px; font-weight: bold;'>{st.session_state.cart[item_key]['quantity']}</div>", unsafe_allow_html=True)
-                
                 with plus_col:
                     if st.button("➕", key=f"plus_{item_key}"):
                         st.session_state.cart[item_key]['quantity'] += 1
                         st.rerun()  # Force immediate rerun
-            
             # Close the menu-item div
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown("---")  # Separator between items
-
     except FileNotFoundError:
         st.error("Menu file not found. Please make sure 'data/menu.csv' exists.")
     except Exception as e:
