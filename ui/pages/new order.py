@@ -1,6 +1,14 @@
 import streamlit as st
 import time
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+import utils.components as components
+#add a clock
+components.add_live_clock()
+
+
 if 'page' not in st.session_state:
     st.session_state.page = 'home'
 
@@ -74,3 +82,5 @@ elif page == "logout":
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.switch_page("login.py")
+
+

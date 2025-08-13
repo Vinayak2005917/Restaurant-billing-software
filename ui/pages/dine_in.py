@@ -3,6 +3,12 @@ import pandas as pd
 import os
 import random
 import datetime
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+import utils.components as components
+#add a clock
+components.add_live_clock()
+
 
 st.set_page_config(page_title="Restaurant Billing Software", layout="wide")
 st.markdown("<h1 style='text-align: center;'>Dine In</h1>", unsafe_allow_html=True)

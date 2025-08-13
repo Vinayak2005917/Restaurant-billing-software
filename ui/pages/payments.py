@@ -3,6 +3,12 @@ import pandas as pd
 import os
 import random
 import datetime
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+import utils.components as components
+#add a clock
+components.add_live_clock()
+
 
 # ---- UI SETUP ----
 st.set_page_config(page_title="Restaurant Billing Software", layout="wide")
@@ -121,6 +127,15 @@ if 'payment_mode' not in st.session_state:
 # ---- Payment mode selector ----
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
+    if st.button("Discount", use_container_width=True):
+        discount_code = st.text_input("Enter discount code", "")
+        if st.button("Apply Discount"):
+            if discount_code == "1":
+                st.session_state.final_total *= 0.8  # Apply 20% discount
+                st.success("Discount applied successfully!")
+            else:
+                st.error("Invalid discount code.")
+    st.write("code : 1")
     if st.button("💸 UPI", use_container_width=True, key="btn_upi"):
         st.session_state['payment_mode'] = "UPI"
     if st.button("💵 Cash", use_container_width=True, key="btn_cash"):

@@ -1,8 +1,14 @@
 import streamlit as st
-import os
 import json
 import hashlib
 import datetime
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+import utils.components as components
+#add a clock
+components.add_live_clock()
+
 
 st.set_page_config(page_title="User Settings", layout="centered")
 
