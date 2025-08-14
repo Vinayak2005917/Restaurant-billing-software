@@ -1,7 +1,16 @@
 
 # Restaurant Billing Software
 
-A Streamlit-based restaurant billing system with role-based auth, intuitive ordering (Dine-in & Take-away), live stock control, payments with GST, PDF receipts, and sales reports. Includes an Admin panel for stock and cashier management.
+This is a modern Streamlit-based restaurant billing system with role-based authentication, intuitive ordering (Dine-in & Take-away), live stock control, payments with GST, PDF receipts, and sales reports. Includes an Admin panel for stock and cashier management.
+
+**Now fully database-powered:** All data (menu, sales, cashiers, stock) is stored in a robust SQLite database (`db/restaurant.db`). No CSV files required for normal operation.
+
+**Quick Start:**
+- Just run `app.py` to launch the entire application:
+  ```powershell
+  streamlit run app.py
+  ```
+- The app is also deployed at [https://vinayak2005917-restaurant-billing-software-uilogin-snyxds.streamlit.app/](https://vinayak2005917-restaurant-billing-software-uilogin-snyxds.streamlit.app/) for instant access.
 
 ## 📋 Table of Contents
 - [Features](#features)
@@ -122,23 +131,26 @@ cashier01,Aarav Sharma,Pass@123
 ```powershell
 streamlit run app.py
 ```
-The app opens at http://localhost:8501
+The app opens at http://localhost:8501 or visit [xyz.com](https://xyz.com) for the live deployment.
 
 ### Basic Workflow
 
-1) Login
-- Admin: `admin/admin` → Admin Panel
-- Cashier: any row from `data/cashier_list.csv` → New Order
+1) **Login**
+  - Admin: `admin/admin` → Admin Panel
+  - Cashier: any user from the database → New Order
 
-2) New Order → choose Dine-in or Take-away, add items with +/- (stock-limited)
+2) **New Order**
+  - Choose Dine-in or Take-away, add items with +/- (stock-limited)
 
-3) Payments → choose UPI/Cash/Card; confirm to persist sale and decrement stock in `menu.csv`; download PDF
+3) **Payments**
+  - Choose UPI/Cash/Card; confirm to persist sale and decrement stock in the database; download PDF
 
-4) Reports → view KPIs and sales table
+4) **Reports**
+  - View KPIs and sales table
 
-5) Admin Settings →
-- Manage Stock: search items, adjust with +/- and save per item
-- Cashiers: add/remove users (username, full name, password)
+5) **Admin Settings**
+  - Manage Stock: search items, adjust with +/- and save per item
+  - Cashiers: add/remove users (username, full name, password)
 
 ## 📁 Project Structure
 
@@ -171,21 +183,22 @@ Restaurant-billing-software/
 ## ⚙️ Configuration
 
 ### Data & Config
-- `data/menu.csv`: item_id, item_name, stock, short_description, price
-- `data/sales_report.csv`: auto-generated sales records
-- `data/cashier_list.csv`: username, full_name, password (plain text)
-- `db/user_settings.json`: per-user settings (names, etc.)
+- All data is now stored in `db/restaurant.db` (SQLite):
+  - `menu` table: item_id, item_name, stock, short_description, price
+  - `sales` table: auto-generated sales records
+  - `cashiers` table: username, full_name, password (plain text)
+  - `user_settings` table: per-user settings (names, etc.)
 
 Stock handling:
 - Live stock display and caps on order pages
-- Stock decremented on payment confirmation and saved back to `menu.csv`
+- Stock decremented on payment confirmation and saved in the database
 
 ## 🛠️ Technical Details
 
 ### Built With
 - Streamlit, Pandas, FPDF2, Python 3.10+
 - Session state, multi-page nav via `st.switch_page`
-- CSV persistence for data
+- SQLite database for all data persistence
 
 Security note:
 - Cashier passwords are stored in plain text for demo simplicity. Consider hashing for production.

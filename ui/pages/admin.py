@@ -54,7 +54,7 @@ with st.sidebar:
     
     # Navigation buttons
     if st.button("📊 Reports", use_container_width=True):
-        st.switch_page("pages/reports.py")
+        st.switch_page("pages/admin_reports.py")
     
     if st.button("⚙️ Settings", use_container_width=True):
         st.switch_page("pages/admin_setting.py")
@@ -167,17 +167,52 @@ with col2:
 st.markdown("---")
 st.markdown("### 📈 Quick Stats")
 
+# Fetch stats from the database
+import sqlite3
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+db_path = os.path.join(project_root, "db", "restaurant.db")
+conn = sqlite3.connect(db_path)
+
+# Total Orders Today & Revenue Today
+try:
+    sales_df = pd.read_sql_query("SELECT * FROM sales", conn)
+    sales_df['Timestamp'] = pd.to_datetime(sales_df['Timestamp'], errors='coerce')
+    today = pd.Timestamp.now().normalize()
+    tomorrow = today + pd.Timedelta(days=1)
+    mask_today = (sales_df['Timestamp'] >= today) & (sales_df['Timestamp'] < tomorrow)
+    total_orders_today = mask_today.sum()
+    revenue_today = float(sales_df.loc[mask_today, 'Total_Amount'].sum())
+except Exception:
+    total_orders_today = 0
+    revenue_today = 0.0
+
+# Active Tables (unique Table_Number for today, only for Dine-in)
+try:
+    active_tables = sales_df.loc[mask_today & (sales_df['Order_Type'] == 'Dine-in'), 'Table_Number'].nunique()
+except Exception:
+    active_tables = 0
+
+# Menu Items
+try:
+    menu_df = pd.read_sql_query("SELECT * FROM menu", conn)
+    menu_items_count = len(menu_df)
+except Exception:
+    menu_items_count = 0
+
+conn.close()
+
 # Create columns for stats
 stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
 
 with stat_col1:
-    st.metric("Total Orders Today", "24", "↑ 12%")
+    st.metric("Total Orders Today", total_orders_today)
 
 with stat_col2:
-    st.metric("Revenue Today", "₹2,450", "↑ 8%")
+    st.metric("Revenue Today", f"₹{revenue_today:.2f}")
 
 with stat_col3:
-    st.metric("Active Tables", "8", "↓ 2")
+    st.metric("Active Tables", active_tables)
 
 with stat_col4:
-    st.metric("Menu Items", "45", "↑ 3")
+    st.metric("Menu Items", menu_items_count)

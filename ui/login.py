@@ -93,30 +93,39 @@ with col2:
                     st.session_state.user_role = "admin"
                     st.switch_page("pages/admin.py")
                 else:
-                    # Validate against data/cashier_list.csv
+                    # Validate against SQLite database (restaurant.db)
+                    import sqlite3
                     try:
                         current_dir = os.path.dirname(os.path.abspath(__file__))
                         project_root = os.path.dirname(current_dir)
-                        cashier_path = os.path.join(project_root, "data", "cashier_list.csv")
-
-                        if not os.path.exists(cashier_path) or os.path.getsize(cashier_path) == 0:
-                            st.error("No cashier records found. Please contact admin.")
+                        db_path = os.path.join(project_root, "db", "restaurant.db")
+                        conn = sqlite3.connect(db_path)
+                        cursor = conn.cursor()
+                        # Try common table names
+                        for table in ["cashiers", "users"]:
+                            try:
+                                cursor.execute(f"SELECT username, full_name, password FROM {table} WHERE username=?", (username,))
+                                row = cursor.fetchone()
+                                if row:
+                                    db_username, db_full_name, db_password = row
+                                    if str(db_password) == str(password):
+                                        st.success("Login successful! Redirecting to new order...")
+                                        st.session_state.logged_in = True
+                                        st.session_state.username = str(db_username)
+                                        st.session_state.full_name = str(db_full_name)
+                                        st.session_state.user_role = "cashier"
+                                        st.switch_page("pages/new order.py")
+                                        conn.close()
+                                        break
+                                    else:
+                                        st.error("Invalid username or password.")
+                                        conn.close()
+                                        break
+                            except Exception:
+                                continue
                         else:
-                            df = pd.read_csv(cashier_path)
-                            if 'username' not in df.columns or 'password' not in df.columns:
-                                st.error("User store is misconfigured. Missing 'username' or 'password'.")
-                            else:
-                                match = df[(df['username'].astype(str) == str(username)) & (df['password'].astype(str) == str(password))]
-                                if not match.empty:
-                                    rec = match.iloc[0]
-                                    st.success("Login successful! Redirecting to new order...")
-                                    st.session_state.logged_in = True
-                                    st.session_state.username = str(rec.get('username', username))
-                                    st.session_state.full_name = str(rec.get('full_name', username))
-                                    st.session_state.user_role = "cashier"
-                                    st.switch_page("pages/new order.py")
-                                else:
-                                    st.error("Invalid username or password.")
+                            st.error("No user records found in database. Please contact admin.")
+                            conn.close()
                     except Exception as e:
                         st.error(f"Login failed: {e}")
     

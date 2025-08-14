@@ -42,14 +42,11 @@ total_items = st.session_state.get("total_items", 0)
 
 # Helper: decrement stock in data/menu.csv for items in cart
 def decrement_menu_stock(cart_items):
+    import sqlite3
+    db_path = os.path.join(project_root, "db", "restaurant.db")
     try:
-        menu_path = os.path.join(project_root, "data", "menu.csv")
-        if not os.path.exists(menu_path):
-            return False, "menu.csv not found"
-        df = pd.read_csv(menu_path)
-        if 'item_name' not in df.columns or 'stock' not in df.columns:
-            return False, "menu.csv missing required columns"
-        # Build a quick lookup for current stocks
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
         for _, item in list(cart_items.items()):
             qty = int(item.get('quantity', 0) or 0)
             if qty <= 0:
@@ -57,16 +54,10 @@ def decrement_menu_stock(cart_items):
             name = item.get('name')
             if not name:
                 continue
-            mask = df['item_name'] == name
-            if mask.any():
-                try:
-                    current_stock = int(pd.to_numeric(df.loc[mask, 'stock']).iloc[0])
-                except Exception:
-                    # If stock not numeric, skip updating that row
-                    continue
-                new_stock = max(0, current_stock - qty)
-                df.loc[mask, 'stock'] = new_stock
-        df.to_csv(menu_path, index=False)
+            # Decrement stock in menu table
+            cursor.execute("UPDATE menu SET stock = MAX(stock - ?, 0) WHERE item_name = ?", (qty, name))
+        conn.commit()
+        conn.close()
         return True, None
     except Exception as e:
         return False, str(e)
@@ -144,7 +135,7 @@ with col2:
         st.session_state['payment_mode'] = "Card"
 
 if st.session_state['payment_mode'] == "UPI":
-    image_path = os.path.join(project_root, "utils", "Screenshot 2025-08-03 224644.png")
+    image_path = os.path.join(project_root, "utils", "QR Code.png")
     c1, c2, c3 = st.columns([2, 3, 1])
     with c2:
         st.image(image_path, width=200)
@@ -171,27 +162,18 @@ if st.session_state['payment_mode'] == "UPI":
                     detail = f"{item['name']} x {item['quantity']} = ₹{item['quantity'] * item['price']:.2f}"
                     order_data["items_detail"].append(detail)
             items_string = " | ".join(order_data["items_detail"])
-            csv_data = {
-                'Order_Number': [order_number],
-                'Order_Type': [order_type],
-                'Table_Number': [table_number],
-                'Total_Amount': [final_total],
-                'Total_Items': [total_items],
-                'Items_Detail': [items_string],
-                'Timestamp': [timestamp]
-            }
             try:
-                csv_path = os.path.join(project_root, "data", "sales_report.csv")
-                if os.path.exists(csv_path) and os.path.getsize(csv_path) > 0:
-                    try:
-                        existing = pd.read_csv(csv_path)
-                        updated = pd.concat([existing, pd.DataFrame(csv_data)], ignore_index=True)
-                        updated.to_csv(csv_path, index=False)
-                    except pd.errors.EmptyDataError:
-                        pd.DataFrame(csv_data).to_csv(csv_path, index=False)
-                else:
-                    pd.DataFrame(csv_data).to_csv(csv_path, index=False)
-                # Decrement stock in menu.csv now that payment is confirmed
+                import sqlite3
+                db_path = os.path.join(project_root, "db", "restaurant.db")
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO sales (Order_Number, Order_Type, Table_Number, Total_Amount, Total_Items, Items_Detail, Timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (order_number, order_type, table_number, final_total, total_items, items_string, timestamp))
+                conn.commit()
+                conn.close()
+                # Decrement stock in menu table
                 ok, err = decrement_menu_stock(cart)
                 if not ok and err:
                     st.warning(f"Stock update skipped: {err}")
@@ -204,7 +186,8 @@ if st.session_state['payment_mode'] == "UPI":
                     'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
-                    'payment_mode': st.session_state.payment_mode
+                    'payment_mode': st.session_state.payment_mode,
+                    'items_detail': order_data["items_detail"]
                 }
                 st.session_state['show_pdf'] = True
                 st.session_state.payment_mode = None
@@ -235,26 +218,17 @@ elif st.session_state['payment_mode'] == "Cash":
                     detail = f"{item['name']} x {item['quantity']} = ₹{item['quantity'] * item['price']:.2f}"
                     order_data["items_detail"].append(detail)
             items_string = " | ".join(order_data["items_detail"])
-            csv_data = {
-                'Order_Number': [order_number],
-                'Order_Type': [order_type],
-                'Table_Number': [table_number],
-                'Total_Amount': [final_total],
-                'Total_Items': [total_items],
-                'Items_Detail': [items_string],
-                'Timestamp': [timestamp]
-            }
             try:
-                csv_path = os.path.join(project_root, "data", "sales_report.csv")
-                if os.path.exists(csv_path) and os.path.getsize(csv_path) > 0:
-                    try:
-                        existing = pd.read_csv(csv_path)
-                        updated = pd.concat([existing, pd.DataFrame(csv_data)], ignore_index=True)
-                        updated.to_csv(csv_path, index=False)
-                    except pd.errors.EmptyDataError:
-                        pd.DataFrame(csv_data).to_csv(csv_path, index=False)
-                else:
-                    pd.DataFrame(csv_data).to_csv(csv_path, index=False)
+                import sqlite3
+                db_path = os.path.join(project_root, "db", "restaurant.db")
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO sales (Order_Number, Order_Type, Table_Number, Total_Amount, Total_Items, Items_Detail, Timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (order_number, order_type, table_number, final_total, total_items, items_string, timestamp))
+                conn.commit()
+                conn.close()
                 # Decrement stock for confirmed order
                 ok, err = decrement_menu_stock(cart)
                 if not ok and err:
@@ -267,7 +241,8 @@ elif st.session_state['payment_mode'] == "Cash":
                     'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
-                    'payment_mode': st.session_state.payment_mode
+                    'payment_mode': st.session_state.payment_mode,
+                    'items_detail': order_data["items_detail"]
                 }
                 st.session_state['show_pdf'] = True
                 st.session_state.payment_mode = None
@@ -299,26 +274,17 @@ elif st.session_state['payment_mode'] == "Card":
                     detail = f"{item['name']} x {item['quantity']} = ₹{item['quantity'] * item['price']:.2f}"
                     order_data["items_detail"].append(detail)
             items_string = " | ".join(order_data["items_detail"])
-            csv_data = {
-                'Order_Number': [order_number],
-                'Order_Type': [order_type],
-                'Table_Number': [table_number],
-                'Total_Amount': [final_total],
-                'Total_Items': [total_items],
-                'Items_Detail': [items_string],
-                'Timestamp': [timestamp]
-            }
             try:
-                csv_path = os.path.join(project_root, "data", "sales_report.csv")
-                if os.path.exists(csv_path) and os.path.getsize(csv_path) > 0:
-                    try:
-                        existing = pd.read_csv(csv_path)
-                        updated = pd.concat([existing, pd.DataFrame(csv_data)], ignore_index=True)
-                        updated.to_csv(csv_path, index=False)
-                    except pd.errors.EmptyDataError:
-                        pd.DataFrame(csv_data).to_csv(csv_path, index=False)
-                else:
-                    pd.DataFrame(csv_data).to_csv(csv_path, index=False)
+                import sqlite3
+                db_path = os.path.join(project_root, "db", "restaurant.db")
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO sales (Order_Number, Order_Type, Table_Number, Total_Amount, Total_Items, Items_Detail, Timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (order_number, order_type, table_number, final_total, total_items, items_string, timestamp))
+                conn.commit()
+                conn.close()
                 # Decrement stock for confirmed order
                 ok, err = decrement_menu_stock(cart)
                 if not ok and err:
@@ -331,7 +297,8 @@ elif st.session_state['payment_mode'] == "Card":
                     'gst_amount': st.session_state.get('gst_amount', 0),
                     'total_items': total_items,
                     'timestamp': timestamp,
-                    'payment_mode': st.session_state.payment_mode
+                    'payment_mode': st.session_state.payment_mode,
+                    'items_detail': order_data["items_detail"]
                 }
                 st.session_state['show_pdf'] = True
                 st.session_state.payment_mode = None
@@ -382,14 +349,19 @@ if st.session_state.get('show_pdf') and st.session_state.get('last_order'):
     else:
         # Try to reconstruct from cart if not present
         items_detail = []
-    # Try to get item details from sales_report.csv if not in session
+    # Try to get item details from sales table in DB if not in session
     if not items_detail:
         try:
-            csv_path = os.path.join(project_root, "data", "sales_report.csv")
-            df = pd.read_csv(csv_path)
-            row = df[df['Order_Number'] == order['order_number']]
-            if not row.empty:
-                items_string = row.iloc[0]['Items_Detail']
+            import sqlite3
+            db_path = os.path.join(project_root, "db", "restaurant.db")
+            conn = sqlite3.connect(db_path)
+            query = "SELECT Items_Detail FROM sales WHERE Order_Number = ?"
+            cursor = conn.cursor()
+            cursor.execute(query, (order['order_number'],))
+            row = cursor.fetchone()
+            conn.close()
+            if row and row[0]:
+                items_string = row[0]
                 items_detail = [x.strip() for x in items_string.split('|')]
         except Exception:
             pass

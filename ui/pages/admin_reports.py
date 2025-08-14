@@ -41,17 +41,13 @@ st.markdown(hide_default_page_menu, unsafe_allow_html=True)
 
 # Sidebar content (same as pages/new order.py)
 with st.sidebar:
-    st.markdown("### 👨‍💼 Staff Info")
-    st.write("**Name:** Vinayak Mishra")
-    st.write("**Role:** Cashier")
-    st.markdown("---")
     st.markdown("### Navigation")
 
-    if st.button("New Order"):
+    if st.button("Admin Dashboard"):
         st.session_state.page = "home"
-        st.switch_page("pages/new order.py")
+        st.switch_page("pages/admin.py")
     if st.button("Settings"):
-        st.switch_page("pages/user_settings.py")
+        st.switch_page("pages/admin_setting.py")
     if st.button("Log Out"):
         st.session_state.page = "logout"
         st.switch_page("pages/new order.py")
@@ -60,7 +56,6 @@ st.markdown("---")
 
 # Load and display sales report
 try:
-    # Load sales data from SQLite database
     import sqlite3
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(os.path.dirname(current_dir))
@@ -249,8 +244,8 @@ try:
                 )
             
     else:
-        st.info("📄 Sales report file exists but contains no data yet.")
-        st.write("Start taking orders to see sales data here!")
+        st.info("📄 No sales data found.")
+        st.write("The sales report will be created automatically when you process your first order.")
         st.markdown("### Expected Data Format:")
         sample_data = {
             'Order_Number': ['ORD12345', 'ORD12346'],
