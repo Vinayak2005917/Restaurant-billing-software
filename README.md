@@ -8,7 +8,7 @@ This is a modern Streamlit-based restaurant billing system with role-based authe
 **Quick Start:**
 - Just run `app.py` to launch the entire application:
   ```powershell
-  streamlit run app.py
+  python app.py
   ```
 - The app is also deployed at [https://vinayak2005917-restaurant-billing-software-uilogin-snyxds.streamlit.app/](https://vinayak2005917-restaurant-billing-software-uilogin-snyxds.streamlit.app/) for instant access.
 
